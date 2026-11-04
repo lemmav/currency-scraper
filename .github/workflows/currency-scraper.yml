@@ -1,0 +1,38 @@
+
+name: Daily exchange rate
+
+on:
+  schedule:
+    - cron: "0 9 * * *" # 12:00 Moscow time (UTC+3)
+  workflow_dispatch: # Manual run
+
+permissions:
+  contents: write
+
+jobs:
+  update-rate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+
+      - name: Scrape rate and send Telegram message
+        run: go run .
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+      - name: Commit updated rate
+        run: |
+          git add state.json
+          if git diff --cached --quiet; then
+            echo "Rate unchanged"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: update exchange rate"
+          git push
