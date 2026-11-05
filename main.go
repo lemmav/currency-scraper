@@ -22,11 +22,26 @@ type State struct {
 }
 
 func main() {
-	client := &http.Client{Timeout: 15 * time.Second}
+	client := &http.Client{Timeout: 30 * time.Second}
 
-	resp, err := client.Get(rateURL)
+	var resp *http.Response
+	var err error
+
+	for attempt := 1; attempt <= 3; attempt++ {
+		resp, err = client.Get(rateURL)
+		if err == nil {
+			break
+		}
+
+		log.Printf("Request failed (attempt %d/3): %v", attempt, err)
+		if attempt < 3 {
+			time.Sleep(2 * time.Second)
+		}
+	}
+
 	check(err)
 	defer resp.Body.Close()
+
 	if resp.StatusCode != http.StatusOK {
 		log.Fatalf("rate API returned %s", resp.Status)
 	}
