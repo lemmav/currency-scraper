@@ -68,6 +68,11 @@ func main() {
 		check(err)
 	}
 
+	if state.Rate != nil && *state.Rate == current {
+		fmt.Println("Rate unchanged, skipping notification")
+		return
+	}
+
 	message := fmt.Sprintf("1 RUB = %.2f UZS\nSource: Unired", current)
 	if state.Rate != nil {
 		change := current - *state.Rate
