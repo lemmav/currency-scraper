@@ -79,6 +79,8 @@ func main() {
 		prefix := ""
 		if change < 0 {
 			prefix = "⭐ Rate decreased!\n\n"
+		} else if change > 0 {
+			prefix = "💔 Rate increased!\n\n"
 		}
 		message = fmt.Sprintf("%s1 RUB = %.2f UZS\nPrevious: %.2f UZS\nChange: %+.2f UZS\nSource: Unired",
 			prefix, current, *state.Rate, change)
